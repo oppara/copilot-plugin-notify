@@ -72,6 +72,32 @@ assert_no_notify() {
   pass "$case_name"
 }
 
+assert_debug_log_formatted() {
+  local case_name="$1"
+  local input="$2"
+
+  local debug_path
+  debug_path="$(mktemp)"
+  TMP_FILES+=("$debug_path")
+
+  if ! run_notify "$input" COPILOT_NOTIFY_DEBUG_PATH="$debug_path" >/dev/null; then
+    fail "$case_name (script failed)" ""
+    return
+  fi
+
+  if ! grep -Fq '  "hook_event_name": "Notification",' "$debug_path"; then
+    fail "$case_name (hook payload was not pretty-printed)" "$(cat "$debug_path")"
+    return
+  fi
+
+  if ! grep -Fq '  "title": "Copilot",' "$debug_path"; then
+    fail "$case_name (notification payload was not written as JSON)" "$(cat "$debug_path")"
+    return
+  fi
+
+  pass "$case_name"
+}
+
 require_commands() {
   local missing=0
   local cmd
@@ -121,6 +147,10 @@ main() {
     "task_complete: 改行は空白に正規化される" \
     '{"toolName":"task_complete","toolArgs":{"summary":"done\nnext"}}' \
     "done next"
+
+  assert_debug_log_formatted \
+    "debug: jqで整形されたJSONを出力する" \
+    '{"hook_event_name":"Notification","message":"debug body"}'
 
   local transcript_path
   transcript_path="$(mktemp)"

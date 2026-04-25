@@ -5,9 +5,29 @@ INPUT="$(cat)"
 DEBUG_MODE="${COPILOT_NOTIFY_DEBUG:-0}"
 DEBUG_PATH="${COPILOT_NOTIFY_DEBUG_PATH:-/tmp/copilot-notify.jsonl}"
 
-if [ "$DEBUG_MODE" = "1" ]; then
-  printf '%s\n' "$INPUT" >>"$DEBUG_PATH"
-fi
+debug_log_json() {
+  local payload="$1"
+  local path="${2:-$DEBUG_PATH}"
+
+  if [ "$DEBUG_MODE" = "1" ]; then
+    printf '%s' "$payload" | jq '.' >>"$path"
+    printf '\n' >>"$path"
+  fi
+}
+
+debug_log_object() {
+  local path="${3:-$DEBUG_PATH}"
+
+  if [ "$DEBUG_MODE" = "1" ]; then
+    jq -n \
+      --arg title "$1" \
+      --arg body "$2" \
+      '{title: $title, body: $body}' >>"$path"
+    printf '\n' >>"$path"
+  fi
+}
+
+debug_log_json "$INPUT"
 
 normalize_spaces() {
   local value="$1"
@@ -115,7 +135,7 @@ elif [[ "$TOOL_NAME" = "report_intent" ]]; then
   echo ""
 elif [ "$STOP_REASON" = "end_turn" ] || [ -n "$TRANSCRIPT_PATH" ]; then
   if [ "$DEBUG_MODE" = "1" ]; then
-    printf '%s\n' "$INPUT" >>/tmp/copilot-notify-agent-stop.jsonl
+    debug_log_json "$INPUT" /tmp/copilot-notify-agent-stop.jsonl
   fi
 
   if [ "$INPUT_TOOL_REQUESTS_COUNT" -eq 0 ] && [ -n "$TRANSCRIPT_PATH" ]; then
@@ -159,9 +179,7 @@ fi
 notify() {
   local title="$1"
   local body="$2"
-  if [ "$DEBUG_MODE" = "1" ]; then
-    printf 'title: %s | body: %s' "$title" "$body" >>"$DEBUG_PATH"
-  fi
+  debug_log_object "$title" "$body"
   if [ "${COPILOT_NOTIFY_FORCE_STDOUT:-0}" = "1" ]; then
     printf '\e]777;notify;%s;%s\a' "$title" "$body"
   else
