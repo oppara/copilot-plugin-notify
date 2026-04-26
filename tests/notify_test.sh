@@ -80,7 +80,7 @@ assert_debug_log_formatted() {
   debug_path="$(mktemp)"
   TMP_FILES+=("$debug_path")
 
-  if ! run_notify "$input" COPILOT_NOTIFY_DEBUG_PATH="$debug_path" >/dev/null; then
+  if ! run_notify "$input" COPILOT_NOTIFY_DEBUG=1 COPILOT_NOTIFY_DEBUG_PATH="$debug_path" >/dev/null; then
     fail "$case_name (script failed)" ""
     return
   fi
