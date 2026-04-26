@@ -183,7 +183,7 @@ notify() {
   if [ "${COPILOT_NOTIFY_FORCE_STDOUT:-0}" = "1" ]; then
     printf '\e]777;notify;%s;%s\a' "$title" "$body"
   else
-    printf '\e]777;notify;%s;%s\a' "$title" "$body" >/dev/tty
+    alerter --title "$title" --message "$body" --timeout 20
   fi
 }
 
