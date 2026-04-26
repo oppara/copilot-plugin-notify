@@ -6,8 +6,12 @@ Tested on macOS only.
 
 ## Install
 
+If you use this plugin with iTerm2 on macOS, install [`alerter`](https://github.com/vjeantet/alerter).
+
 ```bash
-git clone https://github.com/tadashi-aikawa/copilot-plugin-notify.git
+brew install vjeantet/tap/alerter
+
+git clone https://github.com/oppara/copilot-plugin-notify.git
 cd <parent directory of copilot-plugin-notify>
 copilot plugin install ./copilot-plugin-notify
 ```
