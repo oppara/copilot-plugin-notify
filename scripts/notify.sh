@@ -183,7 +183,7 @@ notify() {
   if [ "${COPILOT_NOTIFY_FORCE_STDOUT:-0}" = "1" ]; then
     printf '\e]777;notify;%s;%s\a' "$title" "$body"
   else
-    alerter --title "$title" --message "$body" --timeout 20
+    terminal-notifier -title "Copilot" -message "$body"
   fi
 }
 
